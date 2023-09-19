@@ -1,0 +1,34 @@
+{
+  "name": "tashy",
+  "version": "1.0.0",
+  "description": "Tashy is the simpler version of SAC wellness system.",
+  "main": "app.js",
+  "scripts": {
+    "test": "nodemon app.js",
+    "dev": "nodemon app.js",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anduhailhack/TASHy.git"
+  },
+  "author": "Dawit Kebebe, BereketeAbb Birku, Abenezer Girma",
+  "license": "SEE LICENSE IN LICENCE",
+  "bugs": {
+    "url": "https://github.com/Anduhailhack/TASHy/issues"
+  },
+  "homepage": "https://github.com/Anduhailhack/TASHy#readme",
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.5.0",
+    "nodemailer": "^6.9.5",
+    "telegraf": "^4.13.1"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1",
+    "nodemon": "^3.0.1"
+  }
+}

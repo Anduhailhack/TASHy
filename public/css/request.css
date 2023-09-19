@@ -1,0 +1,47 @@
+input {
+  width: -moz-max-content;
+  width: max-content;
+  margin: 0.5rem;
+}
+
+.questionier {
+  display: flex;
+  flex-direction: column;
+  font-family: "Open-sans", sans-serif;
+}
+
+.questionier div {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.questionier label {
+  cursor: pointer;
+}
+
+.action {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 30% 30% 30%;
+  -moz-column-gap: 3.3%;
+       column-gap: 3.3%;
+}
+
+.info {
+  border-radius: 1rem;
+  border: 2px solid var(--tg-theme-button-text-color, #fff);
+  padding: 1rem;
+}
+
+li {
+  list-style-type: circle;
+  margin-left: 1rem;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.container {
+  padding: 1rem;
+}/*# sourceMappingURL=request.css.map */
