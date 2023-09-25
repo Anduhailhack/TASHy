@@ -9,6 +9,7 @@ const {
 
 const { Student } = require("../menu/student")
 
+const { studMenu } = require('./../botRoutes/stud')
 const { sendEmail } = require("../util/email")
 const { createToken, verifyToken } = require("../util/jwt");
 
@@ -33,6 +34,8 @@ router.get("/send-request", async (req, res) => {
     res.render(path.join('stud', 'send-request'))
 })
 
+
+
 router.post("/login", async (req, res) => {
 	const { email, initData } = req.body
     const { db } = res.locals
@@ -46,6 +49,7 @@ router.post("/login", async (req, res) => {
 	}
 
 	db.checkStudent(email, (result) => {
+        console.log(result);
 		if (result.status) {
 			sendEmail(
 				result.email,
@@ -75,7 +79,9 @@ router.post("/login", async (req, res) => {
 		} else
 			res.status(401).json({
 				status: "unauthorized",
-				result: result.result,
+				result: {
+                    msg: result.msg
+                },
 			});
 	})
 })
@@ -145,7 +151,7 @@ router.post("/verify", async (req, res) => {
 
 router.post("/signup", async (req, res) => {
     const { 
-		stud_id, f_name, l_name,
+		stud_id, f_name, m_name, l_name,
 		email, phone_no, ed_info, 
         diagnosis, initData
 	} = req.body
@@ -168,7 +174,7 @@ router.post("/signup", async (req, res) => {
     const userId = JSON.parse(decodedUrlParams.get("user")).id;
 
     db.addStudent(
-        stud_id, f_name, l_name,
+        stud_id, f_name, l_name, m_name,
 		email, phone_no, userId,
 		ed_info, diagnosis,
         (result) => {
@@ -232,7 +238,7 @@ router.post("/send-request", async (req, res) => {
 
     const { db, bot } = res.locals
 	
-        
+     
     if (!isValidInitData(initData))
     {
         res.status(401).json({
@@ -257,14 +263,18 @@ router.post("/send-request", async (req, res) => {
     const decodedUrlParams = new URLSearchParams(initData);
     const userId = JSON.parse(decodedUrlParams.get("user")).id;
 
+    
     db.addRequest(userId, health_team, undefined, undefined, diagnosis, async (result) => {
 
         if (result.status){
             await db.getStudent(result.data.telegram_id, async studInfo => {
+                const spBot = health_team.replace("_health", "")
+                console.log(userId);
+                studMenu.sendServiceProviders(userId, spBot, diagnosis, studInfo.result)
 
                 let student = new Student(bot);
                 await student.notifyAdmin(studInfo, result, db)
-
+                
                 res.status(200).json({
                     status: "success",
                     result: {

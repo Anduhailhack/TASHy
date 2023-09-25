@@ -6,6 +6,7 @@ signupBtn.addEventListener("click", (event) => {
 	
 	let studId = document.getElementById("id").value;
 	let fName = document.getElementById("f-name").value;
+	let mName = document.getElementById("m-name").value;
 	let lName = document.getElementById("l-name").value;
 	let email = document.getElementById("email").value;
 	let phoneNo = document.getElementById("phone-no").value;
@@ -21,6 +22,7 @@ signupBtn.addEventListener("click", (event) => {
 		axios.post("/stud/signup", {
 			stud_id : studId,
 			f_name: fName,
+			m_name: mName,
 			l_name: lName,
 			email,
 			phone_no: phoneNo,

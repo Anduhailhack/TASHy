@@ -22,26 +22,22 @@ class Student {
 				inline_keyboard :[
 					[
 						{
-							text: "📆 My appointments",
+							text: "🤕 Send requests",
 							web_app : {
-								url : process.env.BASE_WEB_APP + "/stud/my-appointments",
+								url : process.env.BASE_WEB_APP + "/stud/send-request",
 							}
+						},
+					],
+					[
+						{
+							text: "📆 My appointments",
+							callback_data: "my-appointments",
 						},
 					],
 					[
 						{
 							text: " My requests",
-							web_app : {
-								url : process.env.BASE_WEB_APP + "/stud/my-requests",
-							}
-						},
-					],
-					[
-						{
-							text: "🤕 Send requests",
-							web_app : {
-								url : process.env.BASE_WEB_APP + "/stud/send-request",
-							}
+							callback_data: "my-requests"
 						},
 					],
 					[
