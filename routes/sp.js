@@ -76,7 +76,7 @@ router.post("/login", async (req, res) => {
 })
 
 router.post("/signup", async (req, res) => {
-    const {provider_id, f_name, l_name, email, phone_no,
+    const {provider_id, f_name, m_name, l_name, email, phone_no,
 		educational_bkg, speciality, health_team,
 		office_location, available_at, initData} = req.body;
     
@@ -98,7 +98,7 @@ router.post("/signup", async (req, res) => {
     const userId = JSON.parse(decodedUrlParams.get("user")).id;
 
     db.addServiceProvider(
-        provider_id, f_name, l_name, email, phone_no, 
+        provider_id, f_name, m_name, l_name, email, phone_no, 
         userId, educational_bkg, health_team, speciality,
         office_location, available_at,
         (result) => {
