@@ -38,6 +38,7 @@ const studentSchema = new mongoose.Schema({
 		required: [true, "Student ID cannot be set empty"],
 	},
 	f_name: String,
+	m_name: String,
 	l_name: String,
 	// full_name: String,
 	email: {
@@ -199,6 +200,10 @@ const requestSchema = new mongoose.Schema({
 		type: Date,
 		default: Date.now
 	},
+	is_accepted: {
+		type: Boolean,
+		default: false
+	},
 	urgency: String,
 	diagnosis : {
 		code1 : {
@@ -252,6 +257,7 @@ const AppointmentSchema = new mongoose.Schema({
 	request_id: {
 		type: mongoose.Schema.ObjectId,
 		ref: 'Request',
+		unique: true
 		//required: [true, "Request must be refered by the appointment"]
 	},
 	service_provider_id: {
@@ -259,7 +265,7 @@ const AppointmentSchema = new mongoose.Schema({
 		// required: [true, "An appointment must have the ID of the Service Provider"]
 	},
 	time: {
-		type: Date,
+		type: String,
 		// required: [true, "Starting time must be specified"]
 	},
 	status: {

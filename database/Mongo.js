@@ -122,6 +122,7 @@ MongoDb.prototype.addAdmin = async function (
 MongoDb.prototype.addStudent = async function (
 	stud_id,
 	f_name,
+	m_name,
 	l_name,
 	email,
 	phone_no,
@@ -133,6 +134,7 @@ MongoDb.prototype.addStudent = async function (
 	await Student.create({
 		stud_id,
 		f_name,
+		m_name,
 		l_name,
 		email,
 		phone_no,
@@ -151,12 +153,12 @@ MongoDb.prototype.addStudent = async function (
 }
 
 MongoDb.prototype.addServiceProvider = async function (
-	provider_id, f_name, l_name, email, phone_no, 
+	provider_id, f_name, m_name, l_name, email, phone_no, 
 	telegram_id, educational_bkg, sp_team, speciality,
 	office_location, available_at, callback
 ) {
 	await ServiceProvider.create({
-		provider_id, f_name, l_name, email, phone_no, 
+		provider_id, f_name, m_name, l_name, email, phone_no, 
 		telegram_id, educational_bkg, sp_team, speciality,
 		office_location, available_at
 	})

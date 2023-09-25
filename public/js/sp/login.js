@@ -16,8 +16,8 @@ loginBtn.addEventListener("click", (event) => {
 			initData : webApp.getInitData()
 		})
 		.then(res => {
-			sendReqCap.classList.remove("warning");
-			sendReqCap.innerText = res.data.result.msg;
+			loginCaption.classList.remove("warning");
+			loginCaption.innerText = res.data.result.msg;
 
 			if (res.data.status === "success"){
 				axios.get('/sp/verify')

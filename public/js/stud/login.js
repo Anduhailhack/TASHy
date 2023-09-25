@@ -48,7 +48,7 @@ loginBtn.addEventListener("click", (event) => {
 				loginBtn.removeAttribute("style")
 			}else if (res.status === "unauthorized"){
 				loginCaption.classList.add("warning");
-				loginCaption.innerText = res.result.msg;
+				loginCaption.innerText = res.result.msg || "You are not authorized. Please signup properly." ;
 				loginBtn.removeAttribute("disabled")
 				loginBtn.removeAttribute("style")
 			}
@@ -56,7 +56,7 @@ loginBtn.addEventListener("click", (event) => {
 		}).catch((err)=>{
 			console.log(err)
 			loginCaption.classList.add("warning");
-			loginCaption.innerText = "Unknown error happend, please try again.";
+			loginCaption.innerText = err.message || "Unknown error happend, please try again.";
 			loginBtn.removeAttribute("disabled")
 			loginBtn.removeAttribute("style")
 		})
