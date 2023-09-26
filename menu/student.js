@@ -4,9 +4,7 @@ class Student {
 	static signup =
 		`📃 <b>Sign up</b> \n
 		How would you like to proceed? \n
-		Click the following buttons to fill out your form. \n
-		⚠️<em>If it is not openning and you are on telegram proxy but not on VPN, connect your 
-		VPN and try again. </em>`;
+		Click the following buttons to fill out your form. \n`
 	static home = "🏠 <b>Home: </b>";
 	static about_us = "We are SAC";
 

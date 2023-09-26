@@ -104,8 +104,9 @@ SpMenu.prototype.checkNewRequests = async function (ctx) {
                 }
             })
         }
-        myRequests.forEach(request => {
-            const requestView = `<u><b>Request</b></u> \n${request.diagnosis.code1 == true? `<b>Suicidal Ideation: </b>true`: ""}\n${request.diagnosis.code2 == true? `<b>Homicidal Ideation: </b>true`: ""}\n${request.diagnosis.code3 == true? `<b>Depressive Feelings: </b>true`: ""}\n${request.diagnosis.code4 == true? `<b>Low Mood: </b>true`: ""}\n${request.diagnosis.code5 == true? `<b>Alcohol Withdrawal: </b>true`: ""}\n${request.diagnosis.code6 == true? `<b>Insomnia: </b>true`: ""}\n\n <b>Made at</b>: ${request.issued_at.toLocaleString()}`
+        myRequests.forEach(async request => {
+		const user = await Student.findOne({telegram_id: request.telegram_id})
+            const requestView = `<u><b>Request</b></u> \n${request.diagnosis.code1 == true? `<b>Suicidal Ideation: </b>true`: ""}\n${request.diagnosis.code2 == true? `<b>Homicidal Ideation: </b>true`: ""}\n${request.diagnosis.code3 == true? `<b>Depressive Feelings: </b>true`: ""}\n${request.diagnosis.code4 == true? `<b>Low Mood: </b>true`: ""}\n${request.diagnosis.code5 == true? `<b>Alcohol Withdrawal: </b>true`: ""}\n${request.diagnosis.code6 == true? `<b>Insomnia: </b>true`: ""}\n\n <b>Made at by ${user.f_name + user.m_name} </b>: ${request.issued_at.toLocaleString()}`
             bot.telegram.sendMessage(ctx.from.id, requestView, makeRequestAcceptOptions(request._id))
         })
 
