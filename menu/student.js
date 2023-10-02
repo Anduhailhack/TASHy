@@ -50,6 +50,8 @@ class Student {
 	)
     }
 
+
+	
 	notifyAdmin(stud_info, {data}, db) {
 		db.getLoggedInAdmins(async res => {
 			if (res.status){

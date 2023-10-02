@@ -104,25 +104,31 @@ SpMenu.prototype.checkNewRequests = async function (ctx) {
                 }
             })
         }
-        myRequests.forEach(async request => {
-		const user = await Student.findOne({telegram_id: request.telegram_id})
-            const requestView = `<u><b>Request</b></u> \n${request.diagnosis.code1 == true? `<b>Suicidal Ideation: </b>true`: ""}\n${request.diagnosis.code2 == true? `<b>Homicidal Ideation: </b>true`: ""}\n${request.diagnosis.code3 == true? `<b>Depressive Feelings: </b>true`: ""}\n${request.diagnosis.code4 == true? `<b>Low Mood: </b>true`: ""}\n${request.diagnosis.code5 == true? `<b>Alcohol Withdrawal: </b>true`: ""}\n${request.diagnosis.code6 == true? `<b>Insomnia: </b>true`: ""}\n\n <b>Made at by ${user.f_name + user.m_name} </b>: ${request.issued_at.toLocaleString()}`
+        await myRequests.forEach(async request => {
+		    const user = await Student.findOne({telegram_id: request.telegram_id})
+            if(!user)
+                return bot.telegram.sendMessage(ctx.from.id,"User Not Found")   
+            console.log(request);
+            const requestView = `<u><b>Request</b></u> ${request.diagnosis.remark? `\n<b>${request.diagnosis.remark}</b>` : ""}\n${request.diagnosis.code1 == true? `<b>Suicidal Ideation: </b>true`: ""}\n${request.diagnosis.code2 == true? `<b>Homicidal Ideation: </b>true`: ""}\n${request.diagnosis.code3 == true? `<b>Depressive Feelings: </b>true`: ""}\n${request.diagnosis.code4 == true? `<b>Low Mood: </b>true`: ""}\n${request.diagnosis.code5 == true? `<b>Alcohol Withdrawal: </b>true`: ""}\n${request.diagnosis.code6 == true? `<b>Insomnia: </b>true`: ""}\n\n <b>Made at by ${user.f_name +" "+ user.m_name} \n</b>: ${request.issued_at.toLocaleString()}`
             bot.telegram.sendMessage(ctx.from.id, requestView, makeRequestAcceptOptions(request._id))
         })
 
-        ctx.reply("<b>Get Back to Main Menu. </b>", {
+        const chatId = ctx.from.id
+        setTimeout(() => {
+            bot.telegram.sendMessage(chatId, `${myRequests.length} unresponded Requests<b> \nGet Back to Main Menu. </b>`, {
             parse_mode: "HTML",
             reply_markup: {
                 inline_keyboard: [
-                    [
-                        {
-                            text: "Main Menu",
-                            callback_data: "sp-menu"
-                        }
+                        [
+                            {
+                                text: "Main Menu",
+                                callback_data: "sp-menu"
+                            }
+                        ]
                     ]
-                ]
-            }
-        })
+                }
+            })
+        }, 15000)
         
     } catch (error) {
         ctx.reply(error.message)
@@ -191,6 +197,44 @@ SpMenu.prototype.accpetRequest = async function (setting, remark, requestId, ctx
     }
 
 }
+
+SpMenu.prototype.forwardRequest = async function (requestId, serviceProviderId, ctx) {
+    try {
+        const request = await Request.findById(requestId)
+        const appointedSP = await ServiceProvider.findById(serviceProviderId)
+        const student = await Student.findOne({telegram_id: request.telegram_id})
+        
+        if(request.is_accepted){
+            return ctx.reply("The appointment has already been accepted ")
+        }
+
+        console.log(appointedSP);
+        let reqText = `<u><b>Forwarded New Request</b></u> \n${request.diagnosis.code1 == 'true'? `<b>Suicidal Ideation: </b>true`: ""}\n${request.diagnosis.code2 == 'true'? `<b>Homicidal Ideation: </b>true`: ""}\n${request.diagnosis.code3 == 'true'? `<b>Depressive Feelings: </b>true`: ""}\n${request.diagnosis.code4 == 'true'? `<b>Low Mood: </b>true`: ""}\n${request.diagnosis.code5 == 'true'? `<b>Alcohol Withdrawal: </b>true`: ""}\n${request.diagnosis.code6 == 'true'? `<b>Insomnia: </b>true`: ""} \n\n\nStudent's Name: <tg-spoiler><b>${student.f_name}</b></tg-spoiler>\nPhone Number: <tg-spoiler><b>${student.phone_no}</b></tg-spoiler>`
+
+        bot.telegram.sendMessage(appointedSP.telegram_id, reqText, {
+            parse_mode: "HTML",
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        {
+                            text: "Accept",
+                            callback_data: `acceptRequest_${request._id}`
+                        }
+                    ]
+                ]
+            }
+        })
+        let spFname = appointedSP.f_name.replace(/^\w/, (c) => c.toUpperCase());
+        ctx.reply(`The Request is forwarded to Dr.${spFname}`)
+
+        // setTimeout((ctx) => {
+        //     ctx.deleteMessage()
+        // }, 20000)
+    } catch (error) {
+        console.log(error);
+    }
+    
+} 
 
 const makeRequestAcceptOptions = function (request_id){
     return {

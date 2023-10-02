@@ -1,3 +1,7 @@
+const {Session} = require('./../database/SchemaModels')
+const {ServiceProvider} = require('./../menu/sp')
+const {Student} = require('./../menu/student')
+
 class General {
     static db
     

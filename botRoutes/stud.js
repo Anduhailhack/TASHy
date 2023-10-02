@@ -155,23 +155,46 @@ StudMenu.prototype.getAppointmentStatus = async function (ctx) {
     }
 }
 
-StudMenu.prototype.sendServiceProviders = async function (userId, sp_team, diagnosis, student) {
+StudMenu.prototype.sendServiceProviders = async function (userId, sp_team, diagnosis, student, requestId) {
     try {
-        const sps = await ServiceProvider.find({sp_team})
-        sps.forEach(sp => {
-            console.log(sp);
+        const sps = await ServiceProvider.find({sp_team, isSenior: true})
+        console.log(sp_team);
+        
+        sps.forEach(async sp => {
+            let fellowKeyboards = [
+                [    
+                    {
+                        text: "Accept",
+                        callback_data: `acceptRequest_${requestId}_${sp._id}`
+                    },
+                    {
+                        text: "Discard",
+                        callback_data: `discardRequest_${requestId}`
+                    }
+                ]
+            ]
+            await db.getFellowServiceProviders(sp_team)
+                .then(fellows => {
+                    console.log(fellows);
+                    fellows.forEach(fellow => {
+                        fellowKeyboards.push(
+                            [
+                                {
+                                    text: `Forward to Dr. ${fellow.f_name}`,
+                                    callback_data: `FRT_${requestId}_${fellow._id}`
+                                }
+                            ]
+                        )
+
+                    })
+                })
+                
             let reqText = `<u><b>UpComing New Request</b></u> \n${diagnosis.code1 == 'true'? `<b>Suicidal Ideation: </b>true`: ""}\n${diagnosis.code2 == 'true'? `<b>Homicidal Ideation: </b>true`: ""}\n${diagnosis.code3 == 'true'? `<b>Depressive Feelings: </b>true`: ""}\n${diagnosis.code4 == 'true'? `<b>Low Mood: </b>true`: ""}\n${diagnosis.code5 == 'true'? `<b>Alcohol Withdrawal: </b>true`: ""}\n${diagnosis.code6 == 'true'? `<b>Insomnia: </b>true`: ""} \n\n\nName: <b>${student.f_name}</b>\nPhone Number: <b>${student.phone_no}</b>`
+            
             bot.telegram.sendMessage(sp.telegram_id, reqText, {
                 parse_mode: "HTML",
                 reply_markup : {
-                    inline_keyboard: [
-                        [
-                            {
-                                text: "Main Menu",
-                                callback_data: "sp-menu"
-                            },
-                        ],
-                    ]
+                    inline_keyboard: fellowKeyboards
                 }
             })
         })

@@ -14,9 +14,8 @@ const {spMenu} = require('./botRoutes/sp')
 const studentRoute = require("./routes/student")
 const adminRoute = require("./routes/admin")
 const spRoute = require("./routes/sp");
+const { Session } = require("./database/SchemaModels")
 
-(!process.env.NODE_ENV ||
-process.env.NODE_ENV !== "production") && 
 require("dotenv").config()
 
 const db = new MongoDb()
@@ -43,6 +42,19 @@ const admin = new Admin(bot)
 const student = new Student(bot)
 
 bot.start(general.home)
+
+bot.command('home', async ctx => {
+	const key = `${ctx.from.id}:${ctx.from.id}`
+
+	const userSession = await Session.findOne({key})
+
+	if(userSession.data.role == process.env.USER_ROLE)
+		return student.home(ctx.from.id, "")
+	else if(userSession.data.role == process.env.SP_ROLE)
+		return serviceProvider.home(ctx.from.id, "")
+
+})
+
 bot.action("home", general.home)
 bot.action("login", general.login)
 bot.action("signup", general.signup)
@@ -79,6 +91,15 @@ bot.action(/acceptRequest_(.+)/, ctx => {
 	})
 })
 
+bot.action(/FRT_(.+)_(.+)/, ctx => {
+	// console.log(ctx.match);
+	const requestId = ctx.match[1]
+	const spId = ctx.match[2]
+
+
+	spMenu.forwardRequest(requestId, spId, ctx)
+	//Forward Request 
+})
 // bot.action("sp_logout", serviceProvider.logout)
 // bot.action("y_sp_logout", serviceProvider.yesLogout)
 // bot.action("n_sp_logout", serviceProvider.noLogout)

@@ -160,6 +160,10 @@ const serviceProviderSchema = new mongoose.Schema({
 		type: String,
 		enum: ["physical", "mental"]
 	},
+	isSenior: {
+		type: Boolean,
+		default: false
+	},
 	// Add Some Additional
 	speciality: {
 		type: String,

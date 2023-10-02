@@ -267,10 +267,11 @@ router.post("/send-request", async (req, res) => {
     db.addRequest(userId, health_team, undefined, undefined, diagnosis, async (result) => {
 
         if (result.status){
+            requestId = result.data._id
             await db.getStudent(result.data.telegram_id, async studInfo => {
                 const spBot = health_team.replace("_health", "")
                 console.log(userId);
-                studMenu.sendServiceProviders(userId, spBot, diagnosis, studInfo.result)
+                studMenu.sendServiceProviders(userId, spBot, diagnosis, studInfo.result, requestId)
 
                 let student = new Student(bot);
                 await student.notifyAdmin(studInfo, result, db)

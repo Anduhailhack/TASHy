@@ -2,7 +2,7 @@ const nodemailer = require("nodemailer");
 
 const sendEmail = (email, verification_code, callback) => {
 	console.log(verification_code);
-	//return callback(true)
+	return callback(true)
 	
 	let transporter = nodemailer.createTransport({
 		service: "gmail", //this used to work

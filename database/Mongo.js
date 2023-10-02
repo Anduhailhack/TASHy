@@ -452,4 +452,27 @@ MongoDb.prototype.checkStudent = async function(email, callback){
     }
 }
 
+MongoDb.prototype.getFellowServiceProviders = function (sp_team) {
+	return new Promise(async (resolve, reject) => {
+		await ServiceProvider.find({sp_team, isSenior: false})
+			.then (fellows => {
+				if(fellows.length == 0)
+					return reject ({
+						status: false,
+						result: {
+							msg: `No fellow ${sp_team} doctors at the moment`
+						}
+					}) 
+				resolve(fellows)
+			})
+			.catch (err => {
+				reject ({
+					status: false,
+					result: {
+						msg: err.message || "Internal Problem Happened"
+					}
+				}) 
+			})
+	})
+}
 module.exports = { MongoDb }
