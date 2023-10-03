@@ -38,6 +38,7 @@ const studentSchema = new mongoose.Schema({
 		required: [true, "Student ID cannot be set empty"],
 	},
 	f_name: String,
+	m_name: String,
 	l_name: String,
 	// full_name: String,
 	email: {
@@ -64,6 +65,12 @@ const studentSchema = new mongoose.Schema({
 		},
 	},
 	diagnosis: [{}, {}, {}],
+})
+
+studentSchema.pre('save', function() {
+	this.f_name = this.f_name.replace(/^\w/, (c) => c.toUpperCase())
+	this.m_name = this.m_name.replace(/^\w/, (c) => c.toUpperCase())
+	this.l_name = this.l_name.replace(/^\w/, (c) => c.toUpperCase())
 })
 
 const Student = mongoose.model("Student", studentSchema)
@@ -123,6 +130,7 @@ const adminSchema = new mongoose.Schema({
 	}],
 })
 
+
 const Admin = mongoose.model("Admin", adminSchema)
 
 const serviceProviderSchema = new mongoose.Schema({
@@ -133,6 +141,10 @@ const serviceProviderSchema = new mongoose.Schema({
 	f_name: {
 		type: String,
 		required: [true, "First name cannot be empty"],
+	},
+	m_name: {
+		type: String,
+		// required: [true, "First name cannot be empty"],	
 	},
 	l_name: {
 		type: String,
@@ -159,6 +171,10 @@ const serviceProviderSchema = new mongoose.Schema({
 		type: String,
 		enum: ["physical", "mental"]
 	},
+	isSenior: {
+		type: Boolean,
+		default: false
+	},
 	// Add Some Additional
 	speciality: {
 		type: String,
@@ -180,6 +196,12 @@ const serviceProviderSchema = new mongoose.Schema({
 	}],
 })
 
+studentSchema.pre('save', function() {
+	this.f_name = this.f_name.replace(/^\w/, (c) => c.toUpperCase())
+	this.m_name = this.m_name.replace(/^\w/, (c) => c.toUpperCase())
+	this.l_name = this.l_name.replace(/^\w/, (c) => c.toUpperCase())
+})
+
 const ServiceProvider = mongoose.model('ServiceProvider', serviceProviderSchema)
 
 const requestSchema = new mongoose.Schema({
@@ -198,6 +220,18 @@ const requestSchema = new mongoose.Schema({
 	issued_at: {
 		type: Date,
 		default: Date.now
+	},
+	is_accepted: {
+		type: Boolean,
+		default: false
+	},
+	is_forwarded_to: {
+		type: [mongoose.Schema.Types.ObjectId],
+		ref: 'ServiceProvider'
+	},
+	is_discarded: {
+		type: Boolean,
+		default: false
 	},
 	urgency: String,
 	diagnosis : {
@@ -252,6 +286,7 @@ const AppointmentSchema = new mongoose.Schema({
 	request_id: {
 		type: mongoose.Schema.ObjectId,
 		ref: 'Request',
+		unique: true
 		//required: [true, "Request must be refered by the appointment"]
 	},
 	service_provider_id: {
@@ -259,12 +294,12 @@ const AppointmentSchema = new mongoose.Schema({
 		// required: [true, "An appointment must have the ID of the Service Provider"]
 	},
 	time: {
-		type: Date,
+		type: String,
 		// required: [true, "Starting time must be specified"]
 	},
 	status: {
 		type: String,
-		enum: ["rejected", "pending", "Accepted"],
+		enum: ["pending", "concluded"],
 		default: "pending"
 	},
 	remark: String

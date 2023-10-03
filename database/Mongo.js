@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const {verifyToken} = require('./../util/jwt')
 const { 
 	Admin, 
 	ServiceProvider, 
@@ -122,6 +123,7 @@ MongoDb.prototype.addAdmin = async function (
 MongoDb.prototype.addStudent = async function (
 	stud_id,
 	f_name,
+	m_name,
 	l_name,
 	email,
 	phone_no,
@@ -133,6 +135,7 @@ MongoDb.prototype.addStudent = async function (
 	await Student.create({
 		stud_id,
 		f_name,
+		m_name,
 		l_name,
 		email,
 		phone_no,
@@ -151,12 +154,12 @@ MongoDb.prototype.addStudent = async function (
 }
 
 MongoDb.prototype.addServiceProvider = async function (
-	provider_id, f_name, l_name, email, phone_no, 
+	provider_id, f_name, m_name, l_name, email, phone_no, 
 	telegram_id, educational_bkg, sp_team, speciality,
 	office_location, available_at, callback
 ) {
 	await ServiceProvider.create({
-		provider_id, f_name, l_name, email, phone_no, 
+		provider_id, f_name, m_name, l_name, email, phone_no, 
 		telegram_id, educational_bkg, sp_team, speciality,
 		office_location, available_at
 	})
@@ -305,12 +308,12 @@ MongoDb.prototype.setAppointment = async function (
 		remark
 	})
 		.then((data) => {
-			console.log(data)
+			// console.log(data)
 			const ret = { status: true, ...data }
 			callback(ret)
 		})
 		.catch((err) => {
-			console.log("ERROrR",err)
+			// console.log("ERROrR",err)
 			const ret = {status: false, msg: "Error while Inserting to Database", ...err}
 			callback(ret)
 		})
@@ -449,5 +452,56 @@ MongoDb.prototype.checkStudent = async function(email, callback){
         callback({status:false, ...error})
     }
 }
+
+MongoDb.prototype.getFellowServiceProviders = function (sp_team) {
+	return new Promise(async (resolve, reject) => {
+		await ServiceProvider.find({sp_team, isSenior: false})
+			.then (fellows => {
+				if(fellows.length == 0)
+					return reject ({
+						status: false,
+						result: {
+							msg: `No fellow ${sp_team} doctors at the moment`
+						}
+					}) 
+				resolve(fellows)
+			})
+			.catch (err => {
+				reject ({
+					status: false,
+					result: {
+						msg: err.message || "Internal Problem Happened"
+					}
+				}) 
+			})
+	})
+}
+
+MongoDb.prototype.isValidSession = async function (ctx, next) {
+	const telegramId = ctx.from.id
+	const key = `${telegramId}:${telegramId}`
+
+
+	try {
+		const session = await Session.findOne({key})
+		// console.log(session);
+		
+		if(!session)
+			throw new Error("Invalid Session. Please Log in by pressing /start ")
+
+		const token = session.data.token
+		
+		verifyToken(token, (err, decoded) => {
+			if(err)
+				throw new Error("Invalid or Expired Session. Please Log in by pressing /start ")
+			console.log(decoded);
+			next()
+		})
+	} catch (error) {	
+		console.log(error);
+		ctx.reply(error.message)
+	}
+}
+
 
 module.exports = { MongoDb }

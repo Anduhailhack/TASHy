@@ -1,21 +1,22 @@
+const {Session} = require('./../database/SchemaModels')
+const {ServiceProvider} = require('./../menu/sp')
+const {Student} = require('./../menu/student')
+
 class General {
     static db
     
     static homeTxt = "🏠 <b>Home: </b>"
 
-    static loginTxt = `🗝 <b>Login:</b>\n 
+   static loginTxt = `🗝 <b>Login:</b>\n 
     How would you like to proceed? \n
-    Click the following buttons to fill out your credentials.   
-    ⚠️<em>If it is not openning and you are on telegram proxy but not on VPN, connect your 
-    "VPN and try again.</em>`
+    Click the following button to fill out your credentials.`
+ 
 
     static signupTxt = `📃 <b>Sign up</b> \n
     How would you like to proceed? \n
-    Click the following buttons to fill out your form. \n
-    ⚠️<em>If it is not openning and you are on telegram proxy but not on VPN, connect your 
-    VPN and try again. </em>`
+    Click the following buttons to fill out your form.`
 
-    static aboutUsTxt = "We are SAC"
+    static aboutUsTxt = "This is a medical or mental health consultation booking bot developed by the SAC developers team for AAU SoM students."
 
     constructor(db){
         General.db = db
@@ -55,14 +56,14 @@ class General {
                     }
                 }
             ],
-            [
-                {
-                    text: "💰 I want to donate",
-                    web_app: {
-                        url: process.env.BASE_WEB_APP + "/donate",
-                    }
-                }
-            ],
+          //  [
+         //       {
+        //            text: "💰 I want to donate",
+       //             web_app: {
+      //                  url: process.env.BASE_WEB_APP + "/donate",
+    //                }
+   //             }
+   //         ],
             [{ text: "« back home", callback_data:"home" }]
         )
 
@@ -117,14 +118,14 @@ class General {
                     }
                 }
             ],
-            [
-                {
-                    text: "💰 I want to donate",
-                    web_app: {
-                        url: process.env.BASE_WEB_APP + "/donate",
-                    }
-                }
-            ],
+//           [
+//                {
+//                    text: "💰 I want to donate",
+//                    web_app: {
+//                        url: process.env.BASE_WEB_APP + "/donate",
+//                    }
+//                }
+//            ],
             [{ text: "« back home", callback_data:"home" }]
         )
 
@@ -185,6 +186,17 @@ class General {
                 ],
             },
         })
+    }
+
+    async logout(ctx) {
+        const key = `${ctx.from.id}:${ctx.from.id}`
+        try {
+            const session = await Session.findOneAndRemove({key})
+            
+            ctx.reply("/start \nPlease Login or Signup to continue . . . ")
+            home(ctx)
+        } catch (error) {
+        }
     }
 }
 

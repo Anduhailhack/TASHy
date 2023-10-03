@@ -4,9 +4,7 @@ class Student {
 	static signup =
 		`📃 <b>Sign up</b> \n
 		How would you like to proceed? \n
-		Click the following buttons to fill out your form. \n
-		⚠️<em>If it is not openning and you are on telegram proxy but not on VPN, connect your 
-		VPN and try again. </em>`;
+		Click the following buttons to fill out your form. \n`
 	static home = "🏠 <b>Home: </b>";
 	static about_us = "We are SAC";
 
@@ -22,22 +20,6 @@ class Student {
 				inline_keyboard :[
 					[
 						{
-							text: "📆 My appointments",
-							web_app : {
-								url : process.env.BASE_WEB_APP + "/stud/my-appointments",
-							}
-						},
-					],
-					[
-						{
-							text: " My requests",
-							web_app : {
-								url : process.env.BASE_WEB_APP + "/stud/my-requests",
-							}
-						},
-					],
-					[
-						{
 							text: "🤕 Send requests",
 							web_app : {
 								url : process.env.BASE_WEB_APP + "/stud/send-request",
@@ -46,8 +28,20 @@ class Student {
 					],
 					[
 						{
+							text: "📆 My appointments",
+							callback_data: "my-appointments",
+						},
+					],
+					[
+						{
+							text: " My requests",
+							callback_data: "my-requests"
+						},
+					],
+					[
+						{
 							text: "👋 Logout",
-							callback_data : "sp_logout"
+							callback_data : "logout"
 						},
 					],
 				]
@@ -56,6 +50,8 @@ class Student {
 	)
     }
 
+
+	
 	notifyAdmin(stud_info, {data}, db) {
 		db.getLoggedInAdmins(async res => {
 			if (res.status){

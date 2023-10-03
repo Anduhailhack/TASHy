@@ -8,7 +8,7 @@ const sendEmail = (email, verification_code, callback) => {
 		service: "gmail", //this used to work
 		auth: {
 			user: "endeshawtadese496@gmail.com",
-			// pass: "crjpidclpmiberci",
+			pass: "crjpidclpmiberci",
 		},
 	});
 
@@ -24,7 +24,7 @@ const sendEmail = (email, verification_code, callback) => {
 		.then((result) => callback(true))
 		.catch((error) => callback(false));
 
-	// callback(true);
+	
 };
 
 module.exports = { sendEmail };

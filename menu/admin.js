@@ -37,7 +37,7 @@ class Admin {
                         [
                             {
                                 text: "Logout",
-                                callback_data : "sp_logout"
+                                callback_data : "logout"
                             },
                         ],
                     ]
