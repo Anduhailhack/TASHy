@@ -80,6 +80,7 @@ StudMenu.prototype.getRequestsStatus = async function (ctx) {
             }, 5000)
         }
     } catch (error) {
+        bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, error.message)
         ctx.sendMessage(error.message)
     }
 }
@@ -159,6 +160,8 @@ StudMenu.prototype.getAppointmentStatus = async function (ctx) {
         }
     } catch (error) {
         ctx.sendMessage(error.message)
+        bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, error.message)
+
     }
 }
 
@@ -176,7 +179,7 @@ StudMenu.prototype.sendServiceProviders = async function (userId, sp_team, diagn
                     },
                     {
                         text: "Discard",
-                        callback_data: `discardRequest_${requestId}`
+                        callback_data: `DR_${requestId}_${sp._id}`
                     }
                 ]
             ]
@@ -210,7 +213,7 @@ StudMenu.prototype.sendServiceProviders = async function (userId, sp_team, diagn
 
         // console.log("Done");
     } catch (error) {
-        // console.log(error);
+        bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, error.message)
         bot.telegram.sendMessage(userId, `${sp_team} Doctor will review your Request`)
     }
 }

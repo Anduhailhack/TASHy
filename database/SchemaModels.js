@@ -225,7 +225,14 @@ const requestSchema = new mongoose.Schema({
 		type: Boolean,
 		default: false
 	},
-	
+	is_forwarded_to: {
+		type: [mongoose.Schema.Types.ObjectId],
+		ref: 'ServiceProvider'
+	},
+	is_discarded: {
+		type: Boolean,
+		default: false
+	},
 	urgency: String,
 	diagnosis : {
 		code1 : {

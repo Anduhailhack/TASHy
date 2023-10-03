@@ -96,7 +96,7 @@ SpMenu.prototype.checkAppointments = async function (ctx) {
 
     } catch (error) {
         ctx.reply(error.message)
-
+        bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, error.message)
     }
 }
 
@@ -104,7 +104,8 @@ SpMenu.prototype.checkNewRequests = async function (ctx) {
     try {
         const me = await ServiceProvider.findOne({telegram_id: ctx.from.id})
         .catch(err => {
-            throw new Error(err.message)
+        bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, err.message)
+        throw new Error(err.message)
         })
             ctx.answerCbQuery()
             if(!me)
@@ -112,8 +113,15 @@ SpMenu.prototype.checkNewRequests = async function (ctx) {
             let myTeam = me.sp_team 
 
             myTeam += "_health"
-            const myRequests = await Request.find({health_team: myTeam, is_accepted: false})
+            let searchQuery
+            if(me.isSenior){
+                searchQuery = {health_team: myTeam, is_accepted: false, is_discarded: false}
+            } else {
+                searchQuery = {health_team: myTeam, is_accepted: false,  is_discarded: false, is_forwarded_to: {$elemMatch: {$eq: me._id}}}
+            }
+            const myRequests = await Request.find(searchQuery)
             .catch(err => {
+                bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, err.message)
                 throw new Error(err.message)
             }) 
             console.log(me.sp_team);
@@ -150,6 +158,7 @@ SpMenu.prototype.checkNewRequests = async function (ctx) {
                 })
                 
             } catch (error) {
+                bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, error.message)
                 console.log(error);
                 throw error
             }
@@ -173,6 +182,7 @@ SpMenu.prototype.checkNewRequests = async function (ctx) {
         }, 5000)
         
     } catch (error) {
+        bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, error.message)
         ctx.reply(error.message)
     }
 }
@@ -183,11 +193,13 @@ SpMenu.prototype.accpetRequest = async function (setting, remark, requestId, mes
     try {
         const me = await ServiceProvider.findOne({telegram_id: myTelegramId})
             .catch(err =>{
+                bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, err.message)
                 throw new Error(err.message)
             })
         
         const request = await Request.findById(requestId)
             .catch(err =>{
+                bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, err.message)
                 throw new Error(err.message)
             })
         
@@ -204,8 +216,6 @@ SpMenu.prototype.accpetRequest = async function (setting, remark, requestId, mes
             time: setting,
             remark
         }
-    console.log(appointmentObj);
-
 
         await Request.findByIdAndUpdate(requestId, {$set: {is_accepted: true}})
 
@@ -215,8 +225,8 @@ SpMenu.prototype.accpetRequest = async function (setting, remark, requestId, mes
                 let error = new Error ("Appointment already existed")
                 if(err.code == 11000)
                     error.statusCode = 11000
+                bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, err.message)
                 
-
                 throw error
             })
 
@@ -246,7 +256,7 @@ SpMenu.prototype.accpetRequest = async function (setting, remark, requestId, mes
         })
 
     } catch (error) {
-        console.log(error);
+        bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, error.message)
         if(error.statusCode == 11000){
             ctx.reply("<b>Appointment has already been set. </b>", {
             parse_mode: "HTML",
@@ -270,14 +280,22 @@ SpMenu.prototype.accpetRequest = async function (setting, remark, requestId, mes
 
 SpMenu.prototype.forwardRequest = async function (requestId, serviceProviderId, messageId, ctx) {
     try {
-        const request = await Request.findById(requestId)
         const appointedSP = await ServiceProvider.findById(serviceProviderId)
+        const forwarededReq = await Request.findOne({_id: requestId, is_forwarded_to: {$elemMatch: {$eq: serviceProviderId}}})
+        
+        console.log(forwarededReq);
+        if(forwarededReq){
+            ctx.answerCbQuery()
+            return ctx.sendMessage(`The request is already forwarded to Dr ${appointedSP.f_name}. Get /home`)
+        }
+
+        const request = await Request.findByIdAndUpdate(requestId, {$push: {"is_forwarded_to": appointedSP._id}}, {new: 'true'})
         const student = await Student.findOne({telegram_id: request.telegram_id})
         
         if(request.is_accepted){
-            return ctx.reply("The appointment has already been accepted ")
+            return ctx.reply("The appointment has already been accepted. Get /home ")
         }
-
+        ctx.answerCbQuery()
         let reqText = `<u><b>Forwarded New Request</b></u>${request.diagnosis.remark? `\n<b>${request.diagnosis.remark}</b>\n` : ""} ${request.diagnosis.code1 == 'true'? `\n<b>Suicidal Ideation: </b>true`: ""}${request.diagnosis.code2 == 'true'? `\n<b>Homicidal Ideation: </b>true`: ""}${request.diagnosis.code3 == 'true'? `\n<b>Depressive Feelings: </b>true`: ""}${request.diagnosis.code4 == 'true'? `\n<b>Low Mood: </b>true`: ""}${request.diagnosis.code5 == 'true'? `\n<b>Alcohol Withdrawal: </b>true`: ""}${request.diagnosis.code6 == 'true'? `\n<b>Insomnia: </b>true`: ""} \n\n\nStudent's Name: <tg-spoiler><b>${student.f_name}</b></tg-spoiler>\nPhone Number: <tg-spoiler><b>${student.phone_no}</b></tg-spoiler>`
 
         bot.telegram.sendMessage(appointedSP.telegram_id, reqText, {
@@ -292,8 +310,11 @@ SpMenu.prototype.forwardRequest = async function (requestId, serviceProviderId, 
                     ]
                 ]
             }
+        }).catch(err => {
+            ctx.reply(err.message)
+            bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, err.message)
+            
         })
-
 
         let spFname = appointedSP.f_name.replace(/^\w/, (c) => c.toUpperCase());
         ctx.reply(`The Request is forwarded to Dr.${spFname}`)
@@ -302,7 +323,8 @@ SpMenu.prototype.forwardRequest = async function (requestId, serviceProviderId, 
             ctx.deleteMessage(messageId)
         }, 5000)
     } catch (error) {
-        console.log(error);
+        bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, error.message)
+        ctx.reply(error.message)
     }
     
 } 
@@ -315,8 +337,40 @@ SpMenu.prototype.concludeAppointment = async function (appointmentId, messageId,
 
         ctx.reply("Appointment concluded! Please go /home for other menus")
     } catch (error) {
+        bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, error.message)
         ctx.reply(error.message)
         ctx.reply("Please go /home")
+    }
+}
+
+SpMenu.prototype.discardRequest = async function (requestId, spId, ctx) {
+    try {
+        
+        const request = await Request.findById(requestId)
+        const sp = await ServiceProvider.findById(spId)
+        const student = await Student.findOne({telegram_id: request.telegram_id})
+
+        const seniors = await ServiceProvider.find({sp_team: sp.sp_team, _id: {$ne: sp._id}})
+        ctx.answerCbQuery()
+        console.log(seniors);
+        
+        if(sp.isSenior){
+            await Request.findByIdAndUpdate(requestId, {$set: {is_discarded: true}})
+            bot.telegram.sendMessage(student.telegram_id, `A request you made at ${request.issued_at.toLocaleString()} ${request.diagnosis.remark? `with a remark <b>${request.diagnosis.remark}</b> ` : ""} was declined. Please make another request.`)
+            ctx.deleteMessage()
+        } else {
+            const updatedReq = await Request.findByIdAndUpdate(requestId, {$pull: {is_forwarded_to: requestId}})
+
+            seniors.forEach(senior => {
+                console.log(senior);
+                const declineLetter = `Dr. ${sp.f_name} has declined a the forwarded request ${request.diagnosis.remark? `with a remark <b>${request.diagnosis.remark}</b> ` : ""}made by Student <tg-spoiler>${student.f_name}</tg-spoiler>.\n\nPlease check the request at /home`
+                bot.telegram.sendMessage(senior.telegram_id, declineLetter, {parse_mode: "HTML"})
+            })
+            ctx.sendMessage(`Request Discarded. Get /home`)
+            ctx.deleteMessage()
+        }
+    } catch (error) {
+        bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, error.message)
     }
 }
 
@@ -329,7 +383,7 @@ const makeRequestAcceptOptions = async function (sp, requestId){
             },
             {
                 text: "Discard",
-                callback_data: `discardRequest_${requestId}`
+                callback_data: `DR_${requestId}_${sp._id}`
             }
         ]
     ]
@@ -349,11 +403,9 @@ const makeRequestAcceptOptions = async function (sp, requestId){
 
             })
         })
-        .catch((err) => {})
-
-    //console.log(fellowKeyboards);
-
-
+        .catch((err) => {
+            bot.telegram.sendMessage(process.env.DEBUG_CHANNEL, err.message)
+        })
     return fellowKeyboards
 }
 

@@ -73,26 +73,31 @@ bot.action(/acceptRequest_(.+)/, (ctx, next) => db.isValidSession(ctx, next), ct
 	let setting, remark
 	const requestId = ctx.match[1]
 	let messageId = ctx.update.callback_query.message.message_id
-	ctx => ctx.answerCbQuery()
+	ctx.answerCbQuery()
 
-	ctx.reply("Give me the time and date of your Appointment.{Date, Place} <i>Make your response in one text message</i>", {
+	ctx.reply("Give me the time and date of your Appointment.{Date, Place} <i>Make your response in one text message</i>\n\nText me <i><b>cancel</b></i> to cancel setup.", {
 		parse_mode: "HTML"
 	})
-	let prompt1 = "init"
+	let prompt = "init"
 	bot.on("message", async (ctx) => {
-		if(prompt1 == "init"){
+		if(prompt == "init"){
 			setting = await ctx.message.text
-			ctx.reply("Please, add some additional information that you think is necessary. \n\n<b>Make all in one Text</b>\nI will be sending it to the student.", {
+			if(/^\s*c\s*a\s*n\s*c\s*e\s*l\s*$/i.test(setting)) return ctx.reply("Appointment setup canceled. Press /home to get to homepage")
+				else prompt = "accepted"
+
+
+			ctx.reply("Please, add some additional information that you think is necessary. \n\n<b>Make all in one Text</b>\nI will be sending it to the student.\n\nText me <i><b>cancel</b></i> to cancel setup.", {
 				parse_mode: "HTML"
 			})
-			prompt1 = "accepted"
 		}
-		else if(prompt1 == "accepted"){
+		else if(prompt == "accepted"){
 			remark = ctx.message.text
-			prompt1 = "init"
+
+			if(/^\s*c\s*a\s*n\s*c\s*e\s*l\s*$/i.test(remark)) return ctx.reply("Appointment setup canceled. Press /home to get to homepage")
+	   			else prompt = "init"	
 
 			await spMenu.accpetRequest(setting, remark, requestId, messageId, ctx)
-		}
+		} 
 		
 		
 	})
@@ -118,6 +123,14 @@ bot.action(/conclude_(.+)/, (ctx, next) => db.isValidSession(ctx, next), ctx => 
 	spMenu.concludeAppointment(appId, messageId,ctx)
 })
 
+bot.action(/DR_(.+)_(.+)/, (ctx, next) => db.isValidSession(ctx, next), ctx => {
+	//Discard Request
+	const requestId = ctx.match[1]
+	const spId = ctx.match[2]
+	console.log(spId);
+
+	spMenu.discardRequest(requestId, spId, ctx)
+})
 // bot.action("sp_logout", serviceProvider.logout)
 // bot.action("y_sp_logout", serviceProvider.yesLogout)
 // bot.action("n_sp_logout", serviceProvider.noLogout)
