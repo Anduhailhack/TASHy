@@ -5,7 +5,7 @@ class ServiceProvider {
 
     async home (userId, f_name) {
         this.bot.telegram.sendMessage(userId, 
-            `Hello ${f_name},\n You would be able to do your Service Provider Operation From here!`,
+            `Hello ${f_name}!\nYou would be able to do your Service Provider Operation From here!`,
             {
                 parse_mode: "HTML",
                 reply_markup : {
@@ -25,7 +25,7 @@ class ServiceProvider {
                         [
                             {
                                 text: "Logout",
-                                callback_data : "sp_logout"
+                                callback_data : "logout"
                             },
                         ],
                     ]

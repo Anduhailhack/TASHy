@@ -270,7 +270,7 @@ router.post("/send-request", async (req, res) => {
             requestId = result.data._id
             await db.getStudent(result.data.telegram_id, async studInfo => {
                 const spBot = health_team.replace("_health", "")
-                console.log(userId);
+                
                 studMenu.sendServiceProviders(userId, spBot, diagnosis, studInfo.result, requestId)
 
                 let student = new Student(bot);

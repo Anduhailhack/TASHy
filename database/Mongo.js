@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const {verifyToken} = require('./../util/jwt')
 const { 
 	Admin, 
 	ServiceProvider, 
@@ -307,12 +308,12 @@ MongoDb.prototype.setAppointment = async function (
 		remark
 	})
 		.then((data) => {
-			console.log(data)
+			// console.log(data)
 			const ret = { status: true, ...data }
 			callback(ret)
 		})
 		.catch((err) => {
-			console.log("ERROrR",err)
+			// console.log("ERROrR",err)
 			const ret = {status: false, msg: "Error while Inserting to Database", ...err}
 			callback(ret)
 		})
@@ -475,4 +476,32 @@ MongoDb.prototype.getFellowServiceProviders = function (sp_team) {
 			})
 	})
 }
+
+MongoDb.prototype.isValidSession = async function (ctx, next) {
+	const telegramId = ctx.from.id
+	const key = `${telegramId}:${telegramId}`
+
+
+	try {
+		const session = await Session.findOne({key})
+		// console.log(session);
+		
+		if(!session)
+			throw new Error("Invalid Session. Please Log in by pressing /start ")
+
+		const token = session.data.token
+		
+		verifyToken(token, (err, decoded) => {
+			if(err)
+				throw new Error("Invalid or Expired Session. Please Log in by pressing /start ")
+			console.log(decoded);
+			next()
+		})
+	} catch (error) {	
+		console.log(error);
+		ctx.reply(error.message)
+	}
+}
+
+
 module.exports = { MongoDb }

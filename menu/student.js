@@ -41,7 +41,7 @@ class Student {
 					[
 						{
 							text: "👋 Logout",
-							callback_data : "sp_logout"
+							callback_data : "logout"
 						},
 					],
 				]

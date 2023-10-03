@@ -187,6 +187,17 @@ class General {
             },
         })
     }
+
+    async logout(ctx) {
+        const key = `${ctx.from.id}:${ctx.from.id}`
+        try {
+            const session = await Session.findOneAndRemove({key})
+            
+            ctx.reply("/start \nPlease Login or Signup to continue . . . ")
+            home(ctx)
+        } catch (error) {
+        }
+    }
 }
 
 module.exports = { General }

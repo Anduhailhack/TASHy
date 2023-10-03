@@ -4,12 +4,12 @@ const sendReqCap = document.querySelector("#caption");
 sendReqBtn.addEventListener('click', envent => {
     sendReqCap.classList.remove("warning");
     const health_team = document.querySelector("#sp_team")
-    const code1 = document.querySelector("input[name=code_1]:checked")
-    const code2 = document.querySelector("input[name=code_2]:checked")
-    const code3 = document.querySelector("input[name=code_3]:checked")
-    const code4 = document.querySelector("input[name=code_4]:checked")
-    const code5 = document.querySelector("input[name=code_5]:checked")
-    const code6 = document.querySelector("input[name=code_6]:checked")
+    const code1 = document.querySelector("input[name=code_1]:checked") || 'false'
+    const code2 = document.querySelector("input[name=code_2]:checked") || 'false'
+    const code3 = document.querySelector("input[name=code_3]:checked") || 'false'
+    const code4 = document.querySelector("input[name=code_4]:checked") || 'false'
+    const code5 = document.querySelector("input[name=code_5]:checked") || 'false'
+    const code6 = document.querySelector("input[name=code_6]:checked") || 'false'
     const remark = document.querySelector("#remarks")
 
     if (!code1 || !code2 ||
